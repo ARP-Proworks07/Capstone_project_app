@@ -1,7 +1,7 @@
 {
-  "name": "Capstone Project Aditya",
-  "description": "A Node.js app for my project using Express framework",
+  "name": "Capstone_Project_Aditya",
+  "description": "A Node.js app for my project",
   "repository": "https://github.com/ARP-Proworks07/Capstone_project_app.git",
-  "logo": "https://your-logo-url-if-any",
   "keywords": ["node", "express", "capstone", "project"]
+
 }
