@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node-app
+  name: my-nodejs-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: node-app
+      app: my-nodejs-app
   template:
     metadata:
       labels:
-        app: node-app
+        app: my-nodejs-app
     spec:
       containers:
-      - name: node-app
-        image: node-app
+      - name: my-nodejs-app
+        image: my-nodejs-app
         imagePullPolicy: Never
         ports:
         - containerPort: 5000

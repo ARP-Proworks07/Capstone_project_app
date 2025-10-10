@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = "node-app"
+    DOCKER_IMAGE = "my-nodejs-app"
   }
 
   options {
@@ -41,7 +41,7 @@ pipeline {
             def scannerHome = tool 'SonarScanner'
             sh """
               "${scannerHome}/bin/sonar-scanner" \
-                -Dsonar.projectKey=node-app \
+                -Dsonar.projectKey=my-nodejs-app \
                 -Dsonar.sources=. \
                 -Dsonar.sourceEncoding=UTF-8 \
                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
