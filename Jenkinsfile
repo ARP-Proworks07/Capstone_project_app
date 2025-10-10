@@ -23,6 +23,7 @@ pipeline {
 
     stage('Build') {
       steps {
+        sh 'docker build -t $DOCKER_IMAGE --target builder -t ${DOCKER_IMAGE}:builder .'
         sh 'docker build -t $DOCKER_IMAGE .'
       }
     }
@@ -30,7 +31,7 @@ pipeline {
     stage('Extract Coverage') {
       steps {
         sh 'mkdir -p coverage'
-        sh 'docker cp $(docker create $DOCKER_IMAGE):/usr/src/app/coverage/lcov.info coverage/lcov.info'
+        sh 'docker cp $(docker create ${DOCKER_IMAGE}:builder):/usr/src/app/coverage/lcov.info coverage/lcov.info'
       }
     }
 

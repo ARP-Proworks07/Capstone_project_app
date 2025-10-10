@@ -9,7 +9,12 @@ RUN npm test -- --coverage
 # Stage 2: Production image
 FROM node:18
 WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app ./
-RUN npm install --omit=dev
+# Copy package files for production install
+COPY package*.json ./
+RUN npm ci --omit=dev
+# Copy only necessary application files
+COPY server.js app.js ./
+# Port used in the application
 EXPOSE 5000
+# Command to run the application
 CMD ["npm", "start"]
