@@ -1,20 +1,16 @@
-FROM node:18 AS builder
+# Use Node.js runtime
+FROM node:20
 WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm install --include=dev
-COPY . .
-# Run tests with coverage
-RUN npm test
 
-# Stage 2: Production image
-FROM node:18
-WORKDIR /usr/src/app
-# Copy package files for production install
+# Copy package files
 COPY package*.json ./
 RUN npm ci --omit=dev
-# Copy only necessary application files
-COPY server.js app.js ./
-# Port used in the application
+
+# Copy application files
+COPY server.js app.js index.html ./
+
+# Expose port
 EXPOSE 5000
-# Command to run the application
+
+# Start the application
 CMD ["npm", "start"]
