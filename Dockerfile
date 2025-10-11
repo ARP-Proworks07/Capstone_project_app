@@ -7,10 +7,11 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy application files
-COPY server.js app.js index.html ./
+COPY server.js app.js ./
 
 # Expose port
 EXPOSE 5000
 
 # Start the application
+
 CMD ["npm", "start"]
