@@ -15,29 +15,22 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
+    stage('Clone') {
       steps {
         git branch: 'main', url: 'https://github.com/ARP-Proworks07/Capstone_project_app.git'
       }
     }
 
-    stage('Install Dependencies') {
+    stage('Build') {
       steps {
-        sh 'npm ci'
+        sh 'docker build -t $DOCKER_IMAGE .'
       }
     }
 
-    stage('Run Tests') {
+    stage('Extract Coverage') {
       steps {
-        sh 'npm test --passWithNoTests || true'
-      }
-    }
-
-    stage('Build Docker Image') {
-      steps {
-        script {
-          sh 'docker build -t $DOCKER_IMAGE .'
-        }
+        sh 'mkdir -p coverage'
+        sh 'docker cp $(docker create $DOCKER_IMAGE):/usr/src/app/coverage/lcov.info coverage/lcov.info'
       }
     }
 
@@ -51,7 +44,8 @@ pipeline {
                 -Dsonar.projectKey=my-nodejs-app \
                 -Dsonar.sources=. \
                 -Dsonar.sourceEncoding=UTF-8 \
-                -Dsonar.exclusions=node_modules/**
+                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                -Dsonar.javascript.coveragePlugin=lcov
             """
           }
         }
@@ -82,5 +76,5 @@ pipeline {
       echo "❌ Build or quality gate failed. Check logs for details."
     }
   }
-
 }
+
