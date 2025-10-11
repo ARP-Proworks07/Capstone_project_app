@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install production dependencies and create user in one RUN command
-RUN npm ci --only=production && \
+RUN npm install --omit=dev && \
     npm cache clean --force && \
     addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
@@ -27,3 +27,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 CMD ["npm", "start"]
+
