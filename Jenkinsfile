@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'node:20'
-      args '-u root'
-    }
-  }
+  agent any
 
   environment {
     DOCKER_IMAGE = "my-nodejs-app"
@@ -87,4 +82,5 @@ pipeline {
       echo "❌ Build or quality gate failed. Check logs for details."
     }
   }
+
 }
