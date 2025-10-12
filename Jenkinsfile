@@ -6,13 +6,6 @@ pipeline {
     SONAR_TOKEN_CRED = 'sonar-token' // Jenkins credential ID (secret text) for Sonar token
   }
 
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
-
     stage('Install') {
       steps {
         sh 'npm ci'
@@ -66,3 +59,4 @@ pipeline {
     }
   }
 }
+
