@@ -6,12 +6,15 @@ pipeline {
     SONAR_TOKEN_CRED = 'sonar-token' // Jenkins credentials ID (secret text) with Sonar token
   }
 
-  stages {
-    stage('Checkout') {
-      steps {
-        git url: 'https://github.com/<your-username>/<your-repo>.git', branch: 'main'
-      }
-    }
+stage('Checkout') {
+  steps {
+    // If Jenkins job is configured to use "Pipeline from SCM" or Multibranch, use checkout scm:
+    checkout scm
+    // OR, if you must use an explicit git step, use:
+    // git url: 'https://github.com/ARP-Proworks07/Capstone_project_app.git', credentialsId: 'github-pat', branch: 'main'
+  }
+}
+
 
     stage('Install') {
       steps {
@@ -59,3 +62,4 @@ pipeline {
     }
   }
 }
+
