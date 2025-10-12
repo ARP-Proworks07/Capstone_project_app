@@ -2,19 +2,16 @@ pipeline {
   agent any
 
   environment {
-    SONARQUBE = 'sonarqube'           // name you used in Jenkins System config
-    SONAR_TOKEN_CRED = 'sonar-token' // Jenkins credentials ID (secret text) with Sonar token
+    SONARQUBE = 'sonarqube'           // Jenkins SonarQube server name
+    SONAR_TOKEN_CRED = 'sonar-token' // Jenkins credential ID (secret text) for Sonar token
   }
 
-stage('Checkout') {
-  steps {
-    // If Jenkins job is configured to use "Pipeline from SCM" or Multibranch, use checkout scm:
-    checkout scm
-    // OR, if you must use an explicit git step, use:
-    // git url: 'https://github.com/ARP-Proworks07/Capstone_project_app.git', credentialsId: 'github-pat', branch: 'main'
-  }
-}
-
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
 
     stage('Install') {
       steps {
@@ -24,7 +21,7 @@ stage('Checkout') {
 
     stage('Build') {
       steps {
-        sh 'npm run build || true'   // if you have a build step; adjust as needed
+        sh 'npm run build || true'
       }
     }
 
@@ -32,7 +29,6 @@ stage('Checkout') {
       steps {
         withCredentials([string(credentialsId: env.SONAR_TOKEN_CRED, variable: 'SONAR_TOKEN')]) {
           withSonarQubeEnv(env.SONARQUBE) {
-            // Use sonar-scanner via npx (no global install required)
             sh '''
               npx -y sonar-scanner \
                 -Dsonar.projectKey=node-app \
@@ -55,11 +51,18 @@ stage('Checkout') {
 
     stage('Deploy to nginx') {
       steps {
-        // Simple deploy: copy built static files into nginx html dir on host.
-        // This assumes Jenkins agent has SSH deploy rights to host or runs on same host where /usr/share/nginx/html is mounted.
+        // Adjust this to your environment; this example copies files to nginx html folder on the Jenkins host
         sh 'cp -r ./dist/* /usr/share/nginx/html/ || true'
       }
     }
   }
-}
 
+  post {
+    success {
+      echo "Pipeline completed successfully."
+    }
+    failure {
+      echo "Pipeline failed."
+    }
+  }
+}
