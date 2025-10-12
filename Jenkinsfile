@@ -70,11 +70,12 @@ pipeline {
 
   post {
     success {
-      echo "✅ Deployment successful. Visit your app at http://<Minikube-IP>:<NodePort>"
+      echo "✅ Deployment successful. Visit your app at http://<Public-IP>:<NodePort>"
     }
     failure {
       echo "❌ Build or quality gate failed. Check logs for details."
     }
   }
 }
+
 
