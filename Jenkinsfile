@@ -2,80 +2,60 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_IMAGE = "my-nodejs-app"
-  }
-
-  options {
-    timestamps()
-    disableConcurrentBuilds()
-  }
-
-  triggers {
-    githubPush()
+    SONARQUBE = 'sonarqube'           // name you used in Jenkins System config
+    SONAR_TOKEN_CRED = 'sonar-token' // Jenkins credentials ID (secret text) with Sonar token
   }
 
   stages {
-    stage('Clone') {
+    stage('Checkout') {
       steps {
-        git branch: 'main', url: 'https://github.com/ARP-Proworks07/Capstone_project_app.git'
+        git url: 'https://github.com/<your-username>/<your-repo>.git', branch: 'main'
+      }
+    }
+
+    stage('Install') {
+      steps {
+        sh 'npm ci'
       }
     }
 
     stage('Build') {
       steps {
-        sh 'docker build -t $DOCKER_IMAGE .'
+        sh 'npm run build || true'   // if you have a build step; adjust as needed
       }
     }
 
-    stage('Extract Coverage') {
+    stage('SonarQube analysis') {
       steps {
-        sh 'mkdir -p coverage'
-        sh 'docker cp $(docker create $DOCKER_IMAGE):/usr/src/app/coverage/lcov.info coverage/lcov.info'
-      }
-    }
-
-    stage('SonarQube Analysis') {
-      steps {
-        withSonarQubeEnv('sonar-local') {
-          script {
-            def scannerHome = tool 'SonarScanner'
-            sh """
-              "${scannerHome}/bin/sonar-scanner" \
-                -Dsonar.projectKey=my-nodejs-app \
+        withCredentials([string(credentialsId: env.SONAR_TOKEN_CRED, variable: 'SONAR_TOKEN')]) {
+          withSonarQubeEnv(env.SONARQUBE) {
+            // Use sonar-scanner via npx (no global install required)
+            sh '''
+              npx -y sonar-scanner \
+                -Dsonar.projectKey=node-app \
                 -Dsonar.sources=. \
-                -Dsonar.sourceEncoding=UTF-8 \
-                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                -Dsonar.javascript.coveragePlugin=lcov
-            """
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.login=$SONAR_TOKEN
+            '''
           }
         }
       }
     }
 
-    stage('Quality Gate') {
+    stage('Wait for Quality Gate') {
       steps {
-        echo "Waiting for SonarQube analysis to complete..."
-        sleep 15
-        waitForQualityGate abortPipeline: true
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
       }
     }
 
-    stage('Deploy to Minikube') {
+    stage('Deploy to nginx') {
       steps {
-        sh 'kubectl apply -f k8s/deployment.yaml'
-        sh 'kubectl apply -f k8s/service.yaml'
+        // Simple deploy: copy built static files into nginx html dir on host.
+        // This assumes Jenkins agent has SSH deploy rights to host or runs on same host where /usr/share/nginx/html is mounted.
+        sh 'cp -r ./dist/* /usr/share/nginx/html/ || true'
       }
-    }
-  }
-
-  post {
-    success {
-      echo "✅ Deployment successful. Visit your app at http://<Public-IP>:<NodePort>"
-    }
-    failure {
-      echo "❌ Build or quality gate failed. Check logs for details."
     }
   }
 }
-
-
